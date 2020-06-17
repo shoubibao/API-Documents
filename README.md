@@ -1,22 +1,22 @@
 # 收币宝接口文档
 
-所有请求接口数据格式均为application/json形式。
+所有请求接口数据格式均为application/json形式。 收币宝接口请求地址为https://api.shoubibao.com
 
 请求的参数格式如下：
 
 ```json
 {
-    "timestamp": "",
-    "nonce": "",
+    "timestamp": "1592366562",
+    "nonce": "023570",
     "body": "",
-    "sign": ""
+    "sign": "02b3f49f7cfc42e3f4ce6e2c0317bc7a57ed9e8a"
 }
 ```
 
 其中timestamp是请求时的时间信息，UNIX TIME格式，nonce是6位数的随机数，body是业务请求内容的字符串化，sign是请求签名
 
 ```js
-sign=sha256(body+ timestamp + nonce + key )
+sign=sha1(body+ timestamp + nonce + key )
 ```
 
 
@@ -45,17 +45,17 @@ sign=sha256(body+ timestamp + nonce + key )
 {
    "app": "app123",
    "chain": "ETH",
-   "coins": ["USDT"]
+   "coins": ["USDT", "USDC"]
 }
 ```
 
-其中，app是应用ID, chain是链的标识，coin是对应需要的创建的地址币种。
+其中，app是应用ID, chain是链的标识，以链的主货币名称标识，coin是对应需要的创建的地址币种。
 
 返回数据：
 
 ```json
 {
-    "address": ""
+    "address": "0xdeAD16CEbe99a865b03f62A1Ff56c37369470420"
 }
 ```
 
@@ -74,10 +74,10 @@ sign=sha256(body+ timestamp + nonce + key )
    "app": "app123",
    "chain": "ETH",
    "coin": "USDT",
-   "address": "",
+   "address": "0xdeAD16CEbe99a865b03f62A1Ff56c37369470420",
    "amount": "0.10",
-   "orderId": "",
-   "memo": ""
+   "orderId": "order202006171204150001",
+   "memo": "hello"
 }
 ```
 其中，app是应用id, chain是链的标识，以链的主币种标识，coin提币的币种，address的提币目标地址，amount是提币金额，金额的小数点按币种的小数点设计，orderId是唯一不重复的提币订单号，memo是提币交易里面的标识。
@@ -100,7 +100,7 @@ sign=sha256(body+ timestamp + nonce + key )
 {
    "app": "app123",
    "chain": "ETH",
-   "address": ""
+   "address": "0xdeAD16CEbe99a865b03f62A1Ff56c37369470420"
 }
 ```
 
@@ -133,24 +133,24 @@ sign=sha256(body+ timestamp + nonce + key )
 
 ```json
 {
-	"app": "app123",
-	"chain": [{
-		"name": "ETH",
-		"confirm": 12,
-		"coins": [{
-			"name": "USDT",
-			"deposit": true,
-			"withdraw": true,
-			"depositMin": "1.0",
-			"withdrawMin": "10"
-		}, {
-			"name": "HT",
-			"deposit": true,
-			"withdraw": true,
-			"depositMin": "10.0",
-			"withdrawMin": "100"
-		}]
-	}]
+    "app": "app123",
+    "chain": [{
+        "name": "ETH",
+        "confirm": 12,
+        "coins": [{
+             "name": "USDT",
+             "deposit": true,
+             "withdraw": true,
+             "depositMin": "1.0",
+             "withdrawMin": "10"
+        }, {
+            "name": "HT",
+            "deposit": true,
+            "withdraw": true,
+            "depositMin": "10.0",
+            "withdrawMin": "100"
+        }]
+    }]
 }
 ```
 
@@ -163,22 +163,33 @@ sign=sha256(body+ timestamp + nonce + key )
 
 ```json
 {
-    "hash": "",
-    "from": "",
-    "to": "",
-    "chain": "",
-    "coin": "",
-    "amount": "",
-    "confirm": "",
-    "incoming": "",
+    "hash": "0x7c25eaf5116feed5ed1fd4d6a7308f8654ec8276ecb7485934e767eae86edd78",
+    "from": "0x7C1B4Be45a2a33FAFe29B4A0D0A85EF6c79cd56e",
+    "to": "0xFa548538d2DE5038ddF45d698a5c33641A0b435e",
+    "chain": "ETH",
+    "coin": "USDT",
+    "amount": "101",
+    "confirm": 12,
+    "incoming": "true",
     "orderId": "",
-    "block": ""
+    "block": 10281006
 }
 ```
 
 其中，hash标识通知的交易ID，from标识交易发起地址，to标识交易目标地址，chain标识交易所在的链，coin标识交易的货币名称，amount是交易金额，confirm是确认次数，incoming标识是充币(true)或者是提币(false)，orderId是提币交易回调时才有的提币订单号，block是当前交易所在的区块号。
 
 
-回调通知会依据链的confirm次数依次通知相应的次数，如果在confirm此种均没有返回相应的结果，收币宝将最后一个confirm通知，依次在5秒、15秒、30秒、1分钟、3分钟、5分钟的时候再各自通知一次。
+回调通知会依据链的confirm次数依次通知相应的次数，如果在最有一次confirm中应用没有返回相应的结果，收币宝将最后一个confirm通知，依次在5秒、15秒、30秒、1分钟、3分钟、5分钟的时候再各自通知一次。
+
+应用收到回调应用返回结果如下：
+
+```json
+{
+    "success": true,
+    "msg": "",
+    "data": {}
+}
+```
+
 
 
